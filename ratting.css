@@ -1,0 +1,13 @@
+.imdbRating,
+.rottenRating {
+  height: 100px;
+  width: 100px;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  border-radius: 5px;
+  background: red;
+  color: aliceblue;
+  font-size: 12px;
+  margin-top: 10px;
+}
