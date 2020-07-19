@@ -9,6 +9,6 @@
       "css": ["ratting.css"]
     }
   ],
-
+  "icons": { "16": "imdb.png" },
   "web_accessible_resources": ["ratting.js"]
 }
