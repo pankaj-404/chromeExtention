@@ -1,6 +1,7 @@
 {
-  "name": "extension",
+  "name": "chrome extension",
   "version": "1.0",
+  "description": "Ectention for showing IMDB ratings on NETFLIX",
   "manifest_version": 2,
   "content_scripts": [
     {
@@ -10,5 +11,9 @@
     }
   ],
   "icons": { "16": "imdb.png" },
-  "web_accessible_resources": ["ratting.js"]
+  "web_accessible_resources": ["ratting.js"],
+  "browser_action": {
+    "default_icon": "imdb.png",
+    "default_popup": "popup.html"
+  }
 }
