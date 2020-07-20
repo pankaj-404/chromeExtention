@@ -1,11 +1,14 @@
 //apikey=5f66fbfa
 //apikey=5f66fbfa
 window.addEventListener("load", () => {
+	var movieArr = [];
+	var movieYear;
 	function addIMDBRating(imdbMetaData, name, year, rottenRating) {
+		//console.log("u are in rating");
 		var divId = getDivId(name, year);
 		var divEl = document.getElementById(divId);
 		var synopsises = document.querySelectorAll(".synopsis");
-		console.log(synopsises);
+		//console.log(synopsises);
 
 		if (synopsises.length >= 1) {
 			var div = document.createElement("div");
@@ -45,7 +48,6 @@ window.addEventListener("load", () => {
 
 			//Coverting Nodelistto Array
 			let arr = Array.from(synopsises);
-			console.log(arr[0]);
 
 			//Only those movies should be rated that do not have aready imdb ratingdom elemnt and a div with class supplemental-message
 			arr.forEach((item) => {
@@ -56,6 +58,7 @@ window.addEventListener("load", () => {
 						item.previousSibling.className !== "supplemental-message"
 					) {
 						console.log(item.previousSibling.className);
+						flag = true;
 						item.parentNode.insertBefore(div, item);
 					}
 				}
@@ -64,30 +67,29 @@ window.addEventListener("load", () => {
 	}
 
 	// OMDb basically contains all IMDb scores in an API format
-	function getIMDbScore(name, year) {
-		const xhr = new XMLHttpRequest();
-		const url = `https://www.omdbapi.com/?apikey=c53e54a4&t=${name}&y=${year}${(tomatoes = true)}`;
-		console.log(url, "url");
-		xhr.open("GET", url);
-		xhr.send();
-		xhr.onload = (e) => {
-			if (xhr.status === 200) {
-				var apiResponse = JSON.parse(xhr.responseText);
-				console.log(apiResponse, "res");
-				var imdbRating = apiResponse["imdbRating"];
-				var imdbVoteCount = apiResponse["imdbVotes"];
-				var imdbId = apiResponse["imdbID"];
-				if (apiResponse.Response == "False" || !apiResponse) {
-				} else {
-					var rottenRating =
-						apiResponse["Ratings"].length >= 2
-							? apiResponse["Ratings"][1]["Value"]
-							: null;
-				}
-				var imdbMetaData = imdbRating + ":" + imdbVoteCount + ":" + imdbId;
+	function getData(name,year){
+		console.log(movieArr)
+		return fetch(`https://www.omdbapi.com/?apikey=c53e54a4&t=${name}&y=${year}${(tomatoes = true)}`).then(res=>(res.json())).then(res=>movieArr.push(res))
+	}
+
+   
+
+	//Function to repeatedly call so as to append the reviews to the dom whenever a new elemnt id aaded to dom
+	function passRatingRepeatedly() {
+		if (movieArr.length !== 0) {
+			var imdbRating = movieArr[movieArr.length - 1]["imdbRating"];
+			var imdbVoteCount = movieArr[movieArr.length - 1]["imdbVotes"];
+			var imdbId = movieArr[movieArr.length - 1]["imdbID"];
+			if (movieArr[movieArr.length - 1].Response == "False" || !movieArr[movieArr.length - 1]) {
+			} else {
+				var rottenRating =
+					movieArr[movieArr.length - 1]["Ratings"].length >= 2
+						? movieArr[movieArr.length - 1]["Ratings"][1]["Value"]
+						: null;
 			}
-			addIMDBRating(imdbMetaData, name, year, rottenRating);
-		};
+			var imdbMetaData = imdbRating + ":" + imdbVoteCount + ":" + imdbId;
+			addIMDBRating(imdbMetaData, name, movieYear, rottenRating);
+		}
 	}
 
 	// Main code
@@ -98,6 +100,7 @@ window.addEventListener("load", () => {
 	// Define an observer that looks for a specific change.
 	var observer = new MutationObserver(function (mutations, observer) {
 		if (mutations) {
+			//console.log("u are in mutaions");
 			getNameandYear();
 		}
 	});
@@ -112,7 +115,8 @@ window.addEventListener("load", () => {
 
 	//Function to get name and year for a particular movie
 	let temp1, temp2;
-	function getNameandYear() {
+	
+	async function getNameandYear() {
 		var synopsis = document.querySelectorAll(".jawBone .jawbone-title-link");
 		if (synopsis === null) {
 			return;
@@ -136,10 +140,16 @@ window.addEventListener("load", () => {
 
 		if (yearElement.length === 0) return;
 		var year = yearElement[yearElement.length - 1].textContent;
-
-		if (title != temp1) {
-			getIMDbScore(title, year);
+		
+		
+		//To limit the no of api calls done
+		if (title !== temp1) {
+			var x = await setTimeout(async()=>{
+			 var data  = await getData(title,year);
+			},500)	
 		}
+		passRatingRepeatedly();
+
 		temp1 = title;
 		temp2 = year;
 	}
