@@ -58,7 +58,6 @@ window.addEventListener("load", () => {
 						item.previousSibling.className !== "supplemental-message"
 					) {
 						console.log(item.previousSibling.className);
-						flag = true;
 						item.parentNode.insertBefore(div, item);
 					}
 				}
@@ -67,12 +66,24 @@ window.addEventListener("load", () => {
 	}
 
 	// OMDb basically contains all IMDb scores in an API format
-	function getData(name,year){
-		console.log(movieArr)
-		return fetch(`https://www.omdbapi.com/?apikey=c53e54a4&t=${name}&y=${year}${(tomatoes = true)}`).then(res=>(res.json())).then(res=>movieArr.push(res))
+	function getIMDbScore(name, year) {
+		console.log("beforequest");
+		movieYear = year;
+		const xhr = new XMLHttpRequest();
+		const url = `https://www.omdbapi.com/?apikey=c53e54a4&t=${name}&y=${year}${(tomatoes = true)}`;
+		console.log(url);
+		xhr.open("GET", url);
+		xhr.send();
+		xhr.onload = (e) => {
+			if (xhr.status === 200) {
+				var apiResponse = JSON.parse(xhr.responseText);
+				console.log("at the request");
+				movieArr.push(apiResponse);
+				console.log(apiResponse, "res");
+				passRatingRepeatedly();
+			}
+		};
 	}
-
-   
 
 	//Function to repeatedly call so as to append the reviews to the dom whenever a new elemnt id aaded to dom
 	function passRatingRepeatedly() {
@@ -80,7 +91,10 @@ window.addEventListener("load", () => {
 			var imdbRating = movieArr[movieArr.length - 1]["imdbRating"];
 			var imdbVoteCount = movieArr[movieArr.length - 1]["imdbVotes"];
 			var imdbId = movieArr[movieArr.length - 1]["imdbID"];
-			if (movieArr[movieArr.length - 1].Response == "False" || !movieArr[movieArr.length - 1]) {
+			if (
+				movieArr[movieArr.length - 1].Response == "False" ||
+				!movieArr[movieArr.length - 1]
+			) {
 			} else {
 				var rottenRating =
 					movieArr[movieArr.length - 1]["Ratings"].length >= 2
@@ -90,6 +104,7 @@ window.addEventListener("load", () => {
 			var imdbMetaData = imdbRating + ":" + imdbVoteCount + ":" + imdbId;
 			addIMDBRating(imdbMetaData, name, movieYear, rottenRating);
 		}
+		passRatingRepeatedly();
 	}
 
 	// Main code
@@ -100,7 +115,6 @@ window.addEventListener("load", () => {
 	// Define an observer that looks for a specific change.
 	var observer = new MutationObserver(function (mutations, observer) {
 		if (mutations) {
-			//console.log("u are in mutaions");
 			getNameandYear();
 		}
 	});
@@ -115,7 +129,7 @@ window.addEventListener("load", () => {
 
 	//Function to get name and year for a particular movie
 	let temp1, temp2;
-	
+
 	async function getNameandYear() {
 		var synopsis = document.querySelectorAll(".jawBone .jawbone-title-link");
 		if (synopsis === null) {
@@ -140,16 +154,10 @@ window.addEventListener("load", () => {
 
 		if (yearElement.length === 0) return;
 		var year = yearElement[yearElement.length - 1].textContent;
-		
-		
-		//To limit the no of api calls done
-		if (title !== temp1) {
-			var x = await setTimeout(async()=>{
-			 var data  = await getData(title,year);
-			},500)	
-		}
-		passRatingRepeatedly();
 
+		if (title !== temp1) {
+			getIMDbScore(title, year);
+		}
 		temp1 = title;
 		temp2 = year;
 	}
