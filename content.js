@@ -1,11 +1,12 @@
 //apikey=5f66fbfa
 //apikey=5f66fbfa
+let temp1, temp2;
 
 function addIMDBRating(imdbMetaData, name, year, rottenRating) {
+	let ratingAppended = false;
 	var divId = getDivId(name, year);
 	var divEl = document.getElementById(divId);
 	var synopsises = document.querySelectorAll(".synopsis");
-	console.log(synopsises);
 
 	if (synopsises.length >= 1) {
 		var div = document.createElement("div");
@@ -45,7 +46,6 @@ function addIMDBRating(imdbMetaData, name, year, rottenRating) {
 
 		//Coverting Nodelistto Array
 		let arr = Array.from(synopsises);
-		console.log(arr[0]);
 
 		//Only those movies should be rated that do not have aready imdb ratingdom elemnt and a div with class supplemental-message
 		arr.forEach((item) => {
@@ -55,15 +55,18 @@ function addIMDBRating(imdbMetaData, name, year, rottenRating) {
 					item.previousSibling.previousSibling.className !== "imdbRating" &&
 					item.previousSibling.className !== "supplemental-message"
 				) {
-					console.log(item.previousSibling.className);
+					// console.log(item.previousSibling.className);
 					item.parentNode.insertBefore(div, item);
+					ratingAppended = true;
+					counter = 0;
+					console.log("appended");
 				}
 			}
 		});
 	}
 }
 
-// OMDb basically contains all IMDb scores in an API format
+// Function that gives all IMDb scores and Rotten Tomattoes Ratings from omdb based on title and year of the movie
 function getIMDbScore(name, year) {
 	const xhr = new XMLHttpRequest();
 	const url = `https://www.omdbapi.com/?apikey=c53e54a4&t=${name}&y=${year}${(tomatoes = true)}`;
@@ -110,8 +113,8 @@ observer.observe(target, {
 	characterData: true,
 });
 
+
 //Function to get name and year for a particular movie
-let temp1, temp2;
 function getNameandYear() {
 	var synopsis = document.querySelectorAll(".jawBone .jawbone-title-link");
 	if (synopsis === null) {
@@ -138,14 +141,15 @@ function getNameandYear() {
 	var year = yearElement[yearElement.length - 1].textContent;
 
 	if (title != temp1) {
+		temp1 = title;
+		temp2 = year;
 		getIMDbScore(title, year);
 	}
-	temp1 = title;
-	temp2 = year;
 }
 
+//Function used for displaying data on the dom particulary by replacing some elements of the string
 function getDivId(name, year) {
 	var name;
-	name = name.replace(/[^a-z0-9\s]/gi, "");
+	name = name && name.replace(/[^a-z0-9\s]/gi, "");
 	return name;
 }

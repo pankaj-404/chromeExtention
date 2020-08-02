@@ -1,7 +1,7 @@
 {
 	"name": "chrome extension",
 	"version": "1.0",
-	"description": "Extention for showing IMDB ratings on NETFLIX",
+	"description": "Extention for showing IMDB and Rotten Tomatoes ratings on NETFLIX",
 	"manifest_version": 2,
 	"content_scripts": [
 		{
@@ -10,11 +10,11 @@
 			"css": ["rating.css"]
 		}
 	],
-	"icons": { "16": "imdb.png" },
+	"icons": { "16": "logo16.png"},
 	"permissions": ["https://www.netflix.com/*", "https://www.omdbapi.com/*"],
 	"web_accessible_resources": ["rating.js"],
 	"browser_action": {
-		"default_icon": "imdb.png",
+		"default_icon": "logo16.png",
 		"default_popup": "popup.html"
 	}
 }
